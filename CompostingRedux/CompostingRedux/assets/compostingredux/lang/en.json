@@ -1,0 +1,10 @@
+﻿{
+  "block-compostbin-0-raw": "Compost Bin",
+  "block-compostbin-*-raw": "Compost Bin (In Progress)",
+  "block-compostbin-*-done": "Compost Bin (Finished)",
+  "blockdesc-compostbin-*-*": "Add vegetation and rot to create compost over time.",
+  "blockhelp-compostbin-add": "Add",
+  "blockhelp-compostbin-bulkadd": "Add many",
+  "blockhelp-compostbin-turn": "Turn pile with shovel",
+  "blockhelp-compostbin-harvest": "Harvest compost"
+}
