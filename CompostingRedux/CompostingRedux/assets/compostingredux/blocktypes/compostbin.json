@@ -3,8 +3,8 @@
   "class": "compostingredux.compostbinblock",
   "entityClass": "compostingredux.compostbinentity",
   "creativeinventory": {
-    "general": ["*"],
-    "decorative": ["*"]
+    "general": ["*-0-raw"],
+    "decorative": ["*-0-raw"]
   },
   "maxStackSize": 1,
   "blockmaterial": "Wood",
