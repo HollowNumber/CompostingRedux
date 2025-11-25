@@ -12,7 +12,7 @@
   "height": 2,
   "output": {
     "type": "block",
-    "code": "compostbin-0-raw",
+    "code": "compostbin",
     "quantity": 1
   }
 }

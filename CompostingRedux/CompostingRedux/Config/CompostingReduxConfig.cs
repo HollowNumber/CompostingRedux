@@ -1,7 +1,7 @@
 ﻿
-namespace CompostingRedux
+namespace CompostingRedux.Config
 {
-    public class CompostConfig
+    public class CompostingReduxConfig
     {
         // Capacity
         public int MaxCapacity { get; set; } = 64;
@@ -24,14 +24,14 @@ namespace CompostingRedux
         
 
         
-        public CompostConfig()
+        public CompostingReduxConfig()
         {
         }
         
         // Make a copy with default values
-        public static CompostConfig GetDefault()
+        public static CompostingReduxConfig GetDefault()
         {
-            return new CompostConfig();
+            return new CompostingReduxConfig();
         }
     }
 }

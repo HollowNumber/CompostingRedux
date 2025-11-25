@@ -3,54 +3,33 @@
   "class": "compostingredux.compostbinblock",
   "entityClass": "compostingredux.compostbinentity",
   "creativeinventory": {
-    "general": ["*"],
-    "decorative": ["*"]
+    "general": [ "*" ],
+    "decorative": [ "*" ]
   },
   "maxStackSize": 1,
   "blockmaterial": "Wood",
   "replaceable": 900,
   "attributes": {
     "handbook": {
-      "groupBy": [ "compostbin-0-raw" ],
-
+      "groupBy": [ "compostbin" ],
       "linkTitle": "Compost Bin",
       "description": "An essential piece of equipment for turning organic waste into rich compost."
     }
   },
-  "variantgroups": [
-    { "code": "filllevel", "states": ["0", "2", "4", "6", "8"] },
-    { "code": "doneness",  "states": ["raw", "done"] }
-  ],
-  
-  
   "shape": {
-    "base": "block/compostbin-{filllevel}"
+    "base": "block/compostbin"
   },
   "textures": {
     "wood": { "base": "game:block/wood/planks/oak1" },
     "metal": { "base": "game:block/metal/sheet/blackbronze4" },
     "floor": { "base": "game:block/wood/barrel/bottom" },
-    "stave": { "base": "game:block/wood/debarked/aged" },
-    "dirt": {
-      "base": "game:block/soil/flooring/drypackeddirt1a",
-      "alternates": [
-        { "code": "doneness-done", "base": "game:block/soil/fertcompost" }
-      ]
-    }
+    "stave": { "base": "game:block/wood/debarked/aged" }
   },
   "resistance": 2.5,
-  "sideao": {
-    "all": false
-  },
-  "sidesolid": {
-    "all": false
-  },
-  "emitsideao": {
-    "all": false
-  },
-  "sideopaque": {
-    "all": false
-  },
+  "sideao": { "all": false },
+  "sidesolid": { "all": false },
+  "emitsideao": { "all": false },
+  "sideopaque": { "all": false },
   "lightAbsorption": 1,
   "sounds": {
     "place": "game:block/planks",
@@ -66,7 +45,9 @@
     "x1": 0, "y1": 0, "z1": 0,
     "x2": 1, "y2": 0.65, "z2": 1
   },
-  "heldTpIdleAnimation": "holdbothhandslarge", "heldRightReadyAnimation": "heldblockready", "heldTpUseAnimation": "twohandplaceblock",
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldRightReadyAnimation": "heldblockready",
+  "heldTpUseAnimation": "twohandplaceblock",
   "tpHandTransform": {
     "translation": { "x": -1.7, "y": -0.95, "z": -0.69 },
     "rotation": { "x": 12, "y": 14, "z": -81 },
