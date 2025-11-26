@@ -1,18 +1,24 @@
 ﻿{
-  "ingredientPattern": "P P,PPP",
+  "ingredientPattern": "P P,CPC",
   "code": "compostbincraft",
   "ingredients": {
     "P": {
       "type": "item",
       "code": "game:plank-*",
       "name": "wood"
+    },
+    "C" : {
+      "type": "item",
+      "code": "game:plank-*",
+      "name": "wood",
+      "quantity": 2
     }
   },
   "width": 3,
   "height": 2,
   "output": {
     "type": "block",
-    "code": "compostbin-0-raw",
+    "code": "compostingredux:compostbin-0-raw",
     "quantity": 1
   }
 }
