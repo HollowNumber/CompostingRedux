@@ -1,10 +1,19 @@
-﻿{
+{
   "block-compostbin-0-raw": "Compost Bin",
   "block-compostbin-*-raw": "Compost Bin (In Progress)",
   "block-compostbin-*-done": "Compost Bin (Finished)",
   "blockdesc-compostbin-*-*": "Add vegetation and rot to create compost over time.",
   "blockhelp-compostbin-add": "Add",
+  "compostingredux:pile-needs-settle": "The pile needs to settle. Wait {0} more hours.",
   "blockhelp-compostbin-bulkadd": "Add many",
   "blockhelp-compostbin-turn": "Turn pile with shovel",
-  "blockhelp-compostbin-harvest": "Harvest compost"
+  "blockhelp-compostbin-harvest": "Harvest compost",
+  "compostingredux:handbook-howto-title": "How to Use",
+  "compostingredux:handbook-howto-text": "1. Place compostable materials (rotting food, vegetables, grains)\n2. Use a shovel to turn the pile every few hours\n3. Wait for decomposition to complete\n4. Harvest compost for your garden",
+  "compostingredux:handbook-tips-title": "Tips & Tricks",
+  "compostingredux:handbook-tips-text": "• Turn the pile regularly for faster composting",
+
+  "compostingredux:compostbin-tooltip-composting-for": "Composting for: {0}/{1} days \n",
+  "compostingredux:compostbin-tooltip-composting-ready": "Compost Ready!",
+  "compostingredux:compostbin-tooltip-composting-contents": "Contents: \n {0} \n"
 }

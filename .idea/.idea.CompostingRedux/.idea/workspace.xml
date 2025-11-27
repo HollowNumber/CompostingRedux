@@ -9,7 +9,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4965bce8-4bf3-4231-a28d-7d50e7d70103" name="Changes" comment="" />
+    <list default="true" id="4965bce8-4bf3-4231-a28d-7d50e7d70103" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.CompostingRedux/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CompostingRedux/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/BlockEntities/BECompostBin.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/BlockEntities/BECompostBin.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/Blocks/BlockCompostBin.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/Blocks/BlockCompostBin.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/CompostConfig.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/CompostingRedux.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/CompostingRedux.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/CompostingReduxModSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/CompostingReduxModSystem.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/blocktypes/compostbin.json" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/blocktypes/compostbin.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/lang/en.json" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/lang/en.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/shapes/block/compostbin-0.json" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/shapes/block/compostbin-0.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/shapes/block/compostbin-2.json" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/shapes/block/compostbin-2.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/shapes/block/compostbin-4.json" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/shapes/block/compostbin-4.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/shapes/block/compostbin-6.json" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/shapes/block/compostbin-6.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/shapes/block/compostbin-8.json" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/shapes/block/compostbin-8.json" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -19,7 +33,7 @@
     <option name="firstShow" value="false" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="14" />
+    <option name="cachedIndexableFilesCount" value="3" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
@@ -38,10 +52,11 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/e8cb74e7ca8e48f4b3201a3fa54e6e491ec600/aa/91049746/ICoreClientAPI.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/CompostingRedux/CompostingRedux/Config/CompostingReduxConfig.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/CompostingRedux/CompostingRedux/Utils/MeshUtil.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/CompostingRedux/Releases/compostingredux/modinfo.json" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/CompostingRedux/CompostingRedux/BlockEntities/BECompostBin.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/CompostingRedux/CompostingRedux/Blocks/BlockCompostBin.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/CompostingRedux/CompostingRedux/CompostingReduxModSystem.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file:///usr/share/dotnet/sdk/9.0.110/Sdks/Microsoft.NET.Sdk/Sdk/Sdk.props" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file:///usr/share/dotnet/sdk/9.0.110/Sdks/Microsoft.NET.Sdk/Sdk/Sdk.targets" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="false" />
   <component name="ProjectColorInfo">{
@@ -68,11 +83,11 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;ml.llm.LLMConfigurable&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected=".NET Project.CakeBuild">
+  <component name="RunManager" selected=".NET Launch Settings Profile.CompostingRedux: Client">
     <configuration name="CakeBuild" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="" />
       <option name="PROGRAM_PARAMETERS" value="" />
@@ -143,6 +158,10 @@
       <workItem from="1764089166916" duration="164000" />
       <workItem from="1764089378323" duration="58000" />
       <workItem from="1764089462732" duration="14777000" />
+      <workItem from="1764187425730" duration="61000" />
+      <workItem from="1764187512608" duration="1529000" />
+      <workItem from="1764223101264" duration="812000" />
+      <workItem from="1764239651575" duration="7158000" />
     </task>
     <servers />
   </component>

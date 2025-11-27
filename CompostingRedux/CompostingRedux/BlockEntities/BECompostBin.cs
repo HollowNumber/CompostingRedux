@@ -1,27 +1,62 @@
-﻿using System.Text;
-using Vintagestory.API.Client;
+using System.Text;
+using CompostingRedux.BlockEntities.Helpers;
+using CompostingRedux.Configuration;
 using Vintagestory.API.Common;
-using Vintagestory.API.Common.Entities;
+using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 
 namespace CompostingRedux.BlockEntities
 {
+    /// <summary>
+    /// Block entity for the compost bin. Handles composting organic materials over time.
+    /// Players can add compostable items, turn the pile with a shovel to speed up decomposition,
+    /// and harvest finished compost.
+    /// </summary>
     public class BlockEntityCompostBin : BlockEntity
     {
-        private int MaxCapacity => CompostingReduxModSystem.Config.MaxCapacity;
-        private int HoursToComplete = CompostingReduxModSystem.Config.HoursToComplete; // Total hours to finish composting
+        #region Fields
 
         private int itemAmount = 0;
-        private double startTime = 0; // Store when composting started (in total hours)
+        private double startTime = 0; // When composting started (in total hours)
         private bool isFinished = false;
         private double lastTurnTime = 0; // Last time the pile was turned
 
-        // Public accessors
+        private long? tickListenerId = null;
+        private CompostBinFeedback feedback = null!;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Maximum number of items that can be added to the compost bin.
+        /// </summary>
+        private int MaxCapacity => CompostingReduxModSystem.Config.MaxCapacity;
+
+        /// <summary>
+        /// Number of in-game hours required for composting to complete.
+        /// </summary>
+        private int HoursToComplete => CompostingReduxModSystem.Config.HoursToComplete;
+
+        /// <summary>
+        /// Returns true if this is running on the client side.
+        /// </summary>
+        private bool IsClient => Api.Side == EnumAppSide.Client;
+
+        /// <summary>
+        /// Current number of items in the compost bin.
+        /// </summary>
         public int ItemAmount => itemAmount;
+
+        /// <summary>
+        /// Returns true if composting is complete.
+        /// </summary>
         public bool IsFinished => isFinished;
 
-        // Calculate current progress based on elapsed time
+        /// <summary>
+        /// Calculate current progress based on elapsed time (0-100).
+        /// </summary>
         public int CompostProgress
         {
             get
@@ -31,13 +66,15 @@ namespace CompostingRedux.BlockEntities
                 double currentTime = Api.World.Calendar.TotalHours;
                 double elapsedHours = currentTime - startTime;
 
-                // Constant time - always 100 hours
                 float progress = (float)(elapsedHours / HoursToComplete * 100f);
 
                 return (int)GameMath.Min(100f, progress);
             }
         }
 
+        /// <summary>
+        /// Number of in-game hours remaining until composting is complete.
+        /// </summary>
         public int RemainingHours
         {
             get
@@ -47,6 +84,9 @@ namespace CompostingRedux.BlockEntities
             }
         }
 
+        /// <summary>
+        /// Returns true if enough time has passed since the last turn to allow turning again.
+        /// </summary>
         public bool CanTurnPile
         {
             get
@@ -54,13 +94,15 @@ namespace CompostingRedux.BlockEntities
                 if (itemAmount == 0 || isFinished) return false;
 
                 double currentTime = Api.World.Calendar.TotalHours;
-
                 double timeSinceLastTurn = currentTime - lastTurnTime;
 
                 return timeSinceLastTurn >= CompostingReduxModSystem.Config.ShovelSpeedupHours;
             }
         }
 
+        /// <summary>
+        /// Number of in-game hours that have elapsed since composting started.
+        /// </summary>
         public int ElapsedHours
         {
             get
@@ -70,12 +112,27 @@ namespace CompostingRedux.BlockEntities
             }
         }
 
+        #endregion
+
+        #region Initialization & Lifecycle
+
         public override void Initialize(ICoreAPI api)
         {
             base.Initialize(api);
-            RegisterGameTickListener(OnTick, 1000); // Check every second
+
+            // Initialize feedback handler
+            feedback = new CompostBinFeedback(api, Pos);
+
+            // Only start ticking if we have active composting
+            if (itemAmount > 0 && !isFinished)
+            {
+                StartCompostingTick();
+            }
         }
 
+        /// <summary>
+        /// Called periodically to check if composting has completed.
+        /// </summary>
         private void OnTick(float dt)
         {
             if (isFinished || itemAmount == 0 || startTime == 0) return;
@@ -84,211 +141,300 @@ namespace CompostingRedux.BlockEntities
             if (CompostProgress >= 100f && !isFinished)
             {
                 isFinished = true;
+                StopCompostingTick();
                 UpdateBlockState();
-                Api.World.PlaySoundAt(new AssetLocation("game:sounds/effect/compost_finished"), Pos.X, Pos.Y, Pos.Z);
                 MarkDirty();
             }
         }
 
+        /// <summary>
+        /// Registers the tick listener to monitor composting progress.
+        /// </summary>
+        private void StartCompostingTick()
+        {
+            if (tickListenerId == null)
+            {
+                tickListenerId = RegisterGameTickListener(OnTick, CompostBinConstants.TickIntervalMs);
+            }
+        }
+
+        /// <summary>
+        /// Unregisters the tick listener when composting is complete or cancelled.
+        /// </summary>
+        private void StopCompostingTick()
+        {
+            if (tickListenerId.HasValue)
+            {
+                UnregisterGameTickListener(tickListenerId.Value);
+                tickListenerId = null;
+            }
+        }
+
+        #endregion
+
+        #region Player Interaction
+
+        /// <summary>
+        /// Handles player interaction with the compost bin.
+        /// Supports: adding items, turning pile with shovel, and harvesting finished compost.
+        /// </summary>
         public bool OnInteract(IPlayer byPlayer)
         {
+            CompostConfig config = CompostingReduxModSystem.Config;
             ItemSlot handSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
 
             // Case 1: Player is holding a Shovel (Turning the pile)
             if (handSlot.Itemstack?.Collectible.Tool == EnumTool.Shovel)
             {
-                if (itemAmount == 0 || isFinished) return false;
-
-                // Check cooldown
-                double currentTime = Api.World.Calendar.TotalHours;
-                double timeSinceLastTurn = currentTime - lastTurnTime;
-
-                if (timeSinceLastTurn < CompostingReduxModSystem.Config.ShovelTurnCooldownHours)
-                {
-                    // Still on cooldown - show message
-                    double hoursRemaining = CompostingReduxModSystem.Config.ShovelTurnCooldownHours - timeSinceLastTurn;
-                    (Api as ICoreClientAPI)?.ShowChatMessage(
-                        $"The pile needs to settle. Wait {(int)hoursRemaining} more hours."
-                    );
-                    return true;
-                }
-
-                // Advance time by config amount
-                double hoursToAdd = CompostingReduxModSystem.Config.ShovelSpeedupHours;
-                startTime -= hoursToAdd;
-
-                if (startTime < 0) startTime = 0;
-
-                lastTurnTime = currentTime; // Track when pile was turned
-
-                Api.World.PlaySoundAt(new AssetLocation("game:sounds/block/dirt-dig"), Pos.X, Pos.Y, Pos.Z, byPlayer);
-                // Play animation
-                if (byPlayer?.Entity != null)
-                {
-                    byPlayer.Entity.AnimManager.StartAnimation(new AnimationMetaData()
-                    {
-                        Code = "shoveldig-fp",
-                        Animation = "shoveldig-fp",
-                        AnimationSpeed = 1.5f,
-                        Weight = 10,
-                        BlendMode = EnumAnimationBlendMode.Average,
-                        EaseInSpeed = 999f,      // Start immediately
-                        EaseOutSpeed = 999f,     // End immediately
-                        TriggeredBy = new AnimationTrigger()
-                        {
-                            OnControls = [EnumEntityActivity.Idle],
-                            MatchExact = false
-                        }
-                    }.Init());
-    
-                    // Stop the animation after it completes (optional, for extra control)
-                    Api.World.RegisterCallback((dt) => 
-                    {
-                        byPlayer.Entity?.AnimManager.StopAnimation("shoveldig-fp");
-                    }, 3000); // Adjust time in ms based on animation length
-                }
-                
-                
-                if (CompostProgress >= 100f)
-                {
-                    isFinished = true;
-                    UpdateBlockState();
-                }
-
-                MarkDirty(true);
-                return true;
+                return HandleShovelInteraction(byPlayer, config);
             }
 
             // Case 2: Adding Compostable Items
-            if (IsCompostable(handSlot) && itemAmount < MaxCapacity)
+            if (config.IsCompostable(handSlot) && itemAmount < MaxCapacity)
             {
-                bool isSneaking = byPlayer.Entity.Controls.CtrlKey;
-
-                int takeAmount;
-                if (isSneaking)
-                {
-                    int bulkAmount = CompostingReduxModSystem.Config.BulkAddAmount;
-                    takeAmount = GameMath.Min(bulkAmount, GameMath.Min(handSlot.StackSize, MaxCapacity - itemAmount));
-                }
-                else
-                {
-                    // Single add - add only 1 item
-                    takeAmount = GameMath.Min(1, MaxCapacity - itemAmount);
-                }
-
-                if (takeAmount == 0) return false;
-
-                handSlot.TakeOut(takeAmount);
-                itemAmount += takeAmount;
-
-                // Start composting if this is the first addition
-                if (startTime == 0)
-                {
-                    startTime = Api.World.Calendar.TotalHours;
-                }
-
-                Api.World.PlaySoundAt(new AssetLocation("game:sounds/block/sand"), Pos.X, Pos.Y, Pos.Z, byPlayer);
-
-                UpdateBlockState();
-                MarkDirty();
-                return true;
+                return HandleAddItems(byPlayer, handSlot, config);
             }
 
             // Case 3: Finished and Empty Hand (Harvesting)
             if (isFinished && handSlot.Empty)
             {
-                Item compostItem = Api.World.GetItem(new AssetLocation("game", "compost"));
-
-                if (compostItem == null)
-                {
-                    Api.Logger.Error("Compost item 'game:compost' not found in asset database! Cannot harvest.");
-                    return true;
-                }
-
-                int outputAmount = (int)(itemAmount * CompostingReduxModSystem.Config.OutputPerItem);
-                ItemStack outputStack = new ItemStack(compostItem, outputAmount);
-
-                bool transferred = byPlayer.InventoryManager.TryGiveItemstack(outputStack, slotNotifyEffect: true);
-                Api.World.PlaySoundAt(new AssetLocation("game:sounds/player/collect2"), Pos.X, Pos.Y, Pos.Z, byPlayer);
-
-                // Reset State
-                itemAmount = 0;
-                startTime = 0;
-                isFinished = false;
-                UpdateBlockState();
-                MarkDirty();
-                
-                return transferred; 
+                return HandleHarvest(byPlayer, config);
             }
 
             return false;
         }
 
+        /// <summary>
+        /// Handles interaction when player uses a shovel to turn the compost pile.
+        /// </summary>
+        private bool HandleShovelInteraction(IPlayer byPlayer, CompostConfig config)
+        {
+            if (itemAmount == 0 || isFinished) return false;
+
+            // Check cooldown
+            double currentTime = Api.World.Calendar.TotalHours;
+            double timeSinceLastTurn = currentTime - lastTurnTime;
+
+            if (timeSinceLastTurn < config.ShovelTurnCooldownHours)
+            {
+                feedback.ShowCooldownMessage(byPlayer, config.ShovelTurnCooldownHours - timeSinceLastTurn);
+                return true;
+            }
+
+            // Advance composting time
+            double hoursToAdd = config.ShovelSpeedupHours;
+            startTime -= hoursToAdd;
+
+            // Ensure we don't go back further than necessary to complete
+            double maxBacktrack = Api.World.Calendar.TotalHours - HoursToComplete;
+            if (startTime < maxBacktrack)
+            {
+                startTime = maxBacktrack;
+            }
+
+            lastTurnTime = currentTime;
+
+            // Play feedback
+            feedback.PlayDigSound(byPlayer);
+            feedback.PlayShovelDigAnimation(byPlayer);
+            feedback.SpawnDigParticlesBurst(isFinished);
+
+            // Check if this turn completed the composting
+            if (CompostProgress >= 100f)
+            {
+                isFinished = true;
+                StopCompostingTick();
+                UpdateBlockState();
+            }
+
+            MarkDirty(true);
+            return true;
+        }
+
+        /// <summary>
+        /// Handles adding compostable items to the bin.
+        /// </summary>
+        private bool HandleAddItems(IPlayer byPlayer, ItemSlot handSlot, CompostConfig config)
+        {
+            bool isBulkAdd = byPlayer.Entity.Controls.CtrlKey;
+
+            int takeAmount;
+            if (isBulkAdd)
+            {
+                int bulkAmount = config.BulkAddAmount;
+                takeAmount = GameMath.Min(bulkAmount, GameMath.Min(handSlot.StackSize, MaxCapacity - itemAmount));
+            }
+            else
+            {
+                // Single add - add only 1 item
+                takeAmount = GameMath.Min(1, MaxCapacity - itemAmount);
+            }
+
+            if (takeAmount == 0) return false;
+
+            handSlot.TakeOut(takeAmount);
+            itemAmount += takeAmount;
+
+            // Start composting if this is the first addition
+            if (startTime == 0)
+            {
+                startTime = Api.World.Calendar.TotalHours;
+                StartCompostingTick();
+            }
+
+            feedback.PlayAddSound(byPlayer);
+            UpdateBlockState();
+            MarkDirty();
+
+            return true;
+        }
+
+        /// <summary>
+        /// Handles harvesting finished compost from the bin.
+        /// </summary>
+        private bool HandleHarvest(IPlayer byPlayer, CompostConfig config)
+        {
+            Item compostItem = Api.World.GetItem(new AssetLocation(CompostBinConstants.ItemCompost));
+
+            if (compostItem == null)
+            {
+                Api.Logger.Error($"Compost item '{CompostBinConstants.ItemCompost}' not found in asset database! Cannot harvest.");
+                return true;
+            }
+
+            int outputAmount = (int)(itemAmount * config.OutputPerItem);
+            ItemStack outputStack = new ItemStack(compostItem, outputAmount);
+
+            bool transferred = byPlayer.InventoryManager.TryGiveItemstack(outputStack, slotNotifyEffect: true);
+
+            if (transferred)
+            {
+                // Only reset state if items were successfully transferred
+                feedback.PlayHarvestSound(byPlayer);
+
+                // Reset State
+                itemAmount = 0;
+                startTime = 0;
+                isFinished = false;
+                StopCompostingTick();
+                UpdateBlockState();
+                MarkDirty();
+            }
+            else
+            {
+                // Notify player their inventory is full
+                feedback.ShowInventoryFullMessage(byPlayer);
+            }
+
+            return transferred;
+        }
+
+        #endregion
+
+
+
+        #region Block State Management
+
+        /// <summary>
+        /// Updates the visual block state based on fill level and doneness.
+        /// </summary>
         private void UpdateBlockState()
         {
-            // Calculate new Fill Level
+            if (Api?.World?.BlockAccessor == null) return;
+
             float fillRatio = (float)itemAmount / MaxCapacity;
-            string newFillLevel = "0";
-
-            if (fillRatio > CompostingReduxModSystem.Config.FillLevel2Threshold) newFillLevel = "2";
-            if (fillRatio > CompostingReduxModSystem.Config.FillLevel4Threshold) newFillLevel = "4";
-            if (fillRatio > CompostingReduxModSystem.Config.FillLevel6Threshold) newFillLevel = "6";
-            if (fillRatio >= CompostingReduxModSystem.Config.FillLevel8Threshold) newFillLevel = "8";
-
-            // Determine Doneness State
+            string newFillLevel = GetFillLevel(fillRatio);
             string newDonenessState = isFinished ? "done" : "raw";
 
-            Block block = Api.World.BlockAccessor.GetBlock(Pos);
+            Block currentBlock = Api.World.BlockAccessor.GetBlock(Pos);
 
-            if (block.Code.Path.EndsWith($"{newFillLevel}-{newDonenessState}"))
+            // Check if we're already in the correct state
+            if (currentBlock.Code.Path.EndsWith($"{newFillLevel}-{newDonenessState}"))
             {
                 return;
             }
 
-            AssetLocation ctx = block.CodeWithParts(newFillLevel, newDonenessState);
+            // Exchange to new block state
+            AssetLocation newBlockCode = currentBlock.CodeWithParts(newFillLevel, newDonenessState);
+            Block newBlock = Api.World.GetBlock(newBlockCode);
 
-            Api.Logger.Debug($"Compost Bin at {Pos} changing state to {ctx}");
-
-            block = Api.World.GetBlock(ctx);
-
-            Api.World.BlockAccessor.ExchangeBlock(block.Id, Pos);
-
-            Api.Logger.Debug(
-                $"Compost Bin at {Pos} updated to Fill Level: {newFillLevel}, Doneness State: {newDonenessState}");
+            if (newBlock != null)
+            {
+                Api.World.BlockAccessor.ExchangeBlock(newBlock.Id, Pos);
+                Api.Logger.Debug($"Compost Bin at {Pos} updated to Fill Level: {newFillLevel}, Doneness: {newDonenessState}");
+            }
+            else
+            {
+                Api.Logger.Warning($"Failed to find block variant: {newBlockCode}");
+            }
         }
 
-        // Display hover text (timer and progress)
+        /// <summary>
+        /// Determines the fill level string based on the fill ratio.
+        /// </summary>
+        private string GetFillLevel(float fillRatio)
+        {
+            CompostConfig config = CompostingReduxModSystem.Config;
+
+            if (fillRatio >= config.FillLevel8Threshold) return "8";
+            if (fillRatio > config.FillLevel6Threshold) return "6";
+            if (fillRatio > config.FillLevel4Threshold) return "4";
+            if (fillRatio > config.FillLevel2Threshold) return "2";
+            return "0";
+        }
+
+        #endregion
+
+        #region UI & Tooltips
+
+        /// <summary>
+        /// Displays hover text with composting progress information.
+        /// </summary>
         public override void GetBlockInfo(IPlayer forPlayer, StringBuilder dsc)
         {
             base.GetBlockInfo(forPlayer, dsc);
 
-            dsc.AppendLine($"Contents: \n {itemAmount}/{MaxCapacity}");
+            dsc.AppendLine(Lang.Get("compostingredux:compostbin-tooltip-composting-contents",
+                $"{itemAmount}/{MaxCapacity}"));
 
             if (itemAmount > 0 && !isFinished)
             {
-                // Show constant time regardless of fill
-                dsc.AppendLine($"Composting for {ElapsedHours}/{HoursToComplete} hours");
+                dsc.AppendLine(Lang.Get("compostingredux:compostbin-tooltip-composting-for",
+                    (ElapsedHours / 24f).ToString("F1"),
+                    (HoursToComplete / 24f).ToString("F1")));
             }
             else if (isFinished)
             {
-                dsc.AppendLine("Compost ready!");
+                dsc.AppendLine(Lang.Get("compostingredux:compostbin-tooltip-composting-ready"));
             }
         }
 
+        #endregion
+
+        #region Serialization
+
+        /// <summary>
+        /// Saves the block entity state to the world save file.
+        /// </summary>
         public override void ToTreeAttributes(ITreeAttribute tree)
         {
             base.ToTreeAttributes(tree);
-            tree.SetInt("itemAmount", itemAmount);
-            tree.SetDouble("startTime", startTime);
-            tree.SetBool("isFinished", isFinished);
+            tree.SetInt(nameof(itemAmount), itemAmount);
+            tree.SetDouble(nameof(startTime), startTime);
+            tree.SetBool(nameof(isFinished), isFinished);
+            tree.SetDouble(nameof(lastTurnTime), lastTurnTime);
         }
 
+        /// <summary>
+        /// Loads the block entity state from the world save file.
+        /// </summary>
         public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolve)
         {
             base.FromTreeAttributes(tree, worldForResolve);
-            itemAmount = tree.GetInt("itemAmount");
-            startTime = tree.GetDouble("startTime");
-            isFinished = tree.GetBool("isFinished");
+            itemAmount = tree.GetInt(nameof(itemAmount));
+            startTime = tree.GetDouble(nameof(startTime));
+            isFinished = tree.GetBool(nameof(isFinished));
+            lastTurnTime = tree.GetDouble(nameof(lastTurnTime));
 
             if (Api?.World != null)
             {
@@ -296,20 +442,6 @@ namespace CompostingRedux.BlockEntities
             }
         }
 
-        public bool IsCompostable(ItemSlot? handSlot)
-        {
-            if (handSlot == null || handSlot.Empty)
-            {
-                return false;
-            }
-
-            CollectibleObject collectibles = handSlot.Itemstack.Collectible;
-
-            string path = collectibles.Code.Path;
-
-            return path == "rot" 
-                   || path.StartsWith("vegetable-") 
-                   || path.StartsWith("grain-");
-        }
+        #endregion
     }
 }

@@ -1,12 +1,22 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using CompostingRedux.BlockEntities;
+using CompostingRedux.Configuration;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
 namespace CompostingRedux.Blocks
 {
+    /// <summary>
+    /// Block class for the compost bin. Handles player interaction and provides UI hints.
+    /// </summary>
     public class BlockCompostBin : Block
     {
+        #region Interaction
+
+        /// <summary>
+        /// Handles player interaction with the compost bin block.
+        /// Delegates to the block entity for actual logic.
+        /// </summary>
         public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel)
         {
             if (world.BlockAccessor.GetBlockEntity(blockSel.Position) is BlockEntityCompostBin be)
@@ -17,64 +27,39 @@ namespace CompostingRedux.Blocks
             return base.OnBlockInteractStart(world, byPlayer, blockSel);
         }
 
+        #endregion
 
+        #region UI Hints
+
+        /// <summary>
+        /// Provides contextual interaction hints to the player based on the current state of the compost bin.
+        /// </summary>
         public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection,
             IPlayer forPlayer)
         {
-            BlockEntity be = world.BlockAccessor.GetBlockEntity(selection.Position);
-            if (!(be is BlockEntityCompostBin composter))
-                return base.GetPlacedBlockInteractionHelp(world, selection, forPlayer);
-
-            List<WorldInteraction> interactions = new List<WorldInteraction>();
-
-            // Can add rot?
-            if (composter.ItemAmount < CompostingReduxModSystem.Config.MaxCapacity && !composter.IsFinished)
+            if (!(world.BlockAccessor.GetBlockEntity(selection.Position) is BlockEntityCompostBin be))
             {
-                List<ItemStack> compostableItems = new List<ItemStack>();
-    
-                // Add rot
-                Item rotItem = world.GetItem(new AssetLocation("game:rot"));
-                if (rotItem != null)
-                {
-                    compostableItems.Add(new ItemStack(rotItem));
-                }
-    
-                // Add some example vegetables
-                string[] vegetables = new[] { "cabbage", "carrot", "onion", "turnip", "parsnip" };
-                foreach (string veg in vegetables)
-                {
-                    Item vegItem = world.GetItem(new AssetLocation($"game:vegetable-{veg}"));
-                    if (vegItem != null)
-                    {
-                        compostableItems.Add(new ItemStack(vegItem));
-                        break; // Just show one vegetable as example
-                    }
-                }
-    
-                // Add some example grains
-                string[] grains = new[] { "flax", "rice", "rye", "spelt" };
-                foreach (string grain in grains)
-                {
-                    Item grainItem = world.GetItem(new AssetLocation($"game:grain-{grain}"));
-                    if (grainItem != null)
-                    {
-                        compostableItems.Add(new ItemStack(grainItem));
-                        break; // Just show one grain as example
-                    }
-                }
-    
+                return base.GetPlacedBlockInteractionHelp(world, selection, forPlayer);
+            }
+
+            var interactions = new List<WorldInteraction>();
+            var config = CompostingReduxModSystem.Config;
+
+            // 1. Add Items Interaction
+            if (be.ItemAmount < config.MaxCapacity && !be.IsFinished)
+            {
+                var compostableItems = GetCompostableExamples(world);
+
                 if (compostableItems.Count > 0)
                 {
-                    // Single add
-                    interactions.Add(new WorldInteraction()
+                    interactions.Add(new WorldInteraction
                     {
                         ActionLangCode = "compostingredux:blockhelp-compostbin-add",
                         MouseButton = EnumMouseButton.Right,
                         Itemstacks = compostableItems.ToArray()
                     });
-        
-                    // Bulk add
-                    interactions.Add(new WorldInteraction()
+
+                    interactions.Add(new WorldInteraction
                     {
                         ActionLangCode = "compostingredux:blockhelp-compostbin-bulkadd",
                         MouseButton = EnumMouseButton.Right,
@@ -84,25 +69,13 @@ namespace CompostingRedux.Blocks
                 }
             }
 
-            // Can turn pile with shovel?
-            if (composter.ItemAmount > 0 && !composter.IsFinished)
+            // 2. Turn Pile Interaction
+            if (be is { ItemAmount: > 0, IsFinished: false })
             {
-                List<ItemStack> shovels = new List<ItemStack>();
-
-                // Safely add shovels if they exist
-                string[] shovelTypes = new[] { "copper", "bronze", "iron", "steel" };
-                foreach (string type in shovelTypes)
-                {
-                    Item shovel = world.GetItem(new AssetLocation($"game:shovel-{type}"));
-                    if (shovel != null)
-                    {
-                        shovels.Add(new ItemStack(shovel));
-                    }
-                }
-
+                var shovels = GetShovelExamples(world);
                 if (shovels.Count > 0)
                 {
-                    interactions.Add(new WorldInteraction()
+                    interactions.Add(new WorldInteraction
                     {
                         ActionLangCode = "compostingredux:blockhelp-compostbin-turn",
                         MouseButton = EnumMouseButton.Right,
@@ -111,10 +84,10 @@ namespace CompostingRedux.Blocks
                 }
             }
 
-            // Can harvest?
-            if (composter.IsFinished)
+            // 3. Harvest Interaction
+            if (be.IsFinished)
             {
-                interactions.Add(new WorldInteraction()
+                interactions.Add(new WorldInteraction
                 {
                     ActionLangCode = "compostingredux:blockhelp-compostbin-harvest",
                     MouseButton = EnumMouseButton.Right
@@ -123,5 +96,67 @@ namespace CompostingRedux.Blocks
 
             return interactions.ToArray();
         }
+
+        #endregion
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Gets example compostable items to display in interaction hints.
+        /// </summary>
+        private List<ItemStack> GetCompostableExamples(IWorldAccessor world)
+        {
+            var list = new List<ItemStack>();
+
+            TryAdd(world, list, "game:rot");
+
+            // Add one example of each category
+            string[] vegExamples = { "cabbage", "carrot", "onion", "turnip", "parsnip" };
+            foreach (var veg in vegExamples)
+            {
+                if (TryAdd(world, list, $"game:vegetable-{veg}")) break;
+            }
+
+            string[] grainExamples = { "flax", "rice", "rye", "spelt" };
+            foreach (var grain in grainExamples)
+            {
+                if (TryAdd(world, list, $"game:grain-{grain}")) break;
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Gets example shovel items to display in interaction hints.
+        /// </summary>
+        private List<ItemStack> GetShovelExamples(IWorldAccessor world)
+        {
+            var list = new List<ItemStack>();
+            string[] materials = { "copper", "bronze", "iron", "steel" };
+
+            foreach (var mat in materials)
+            {
+                TryAdd(world, list, $"game:shovel-{mat}");
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Attempts to add an item to the list by its code. Returns true if successful.
+        /// </summary>
+        private bool TryAdd(IWorldAccessor world, List<ItemStack> list, string itemCode)
+        {
+            var item = world.GetItem(new AssetLocation(itemCode));
+            if (item != null)
+            {
+                list.Add(new ItemStack(item));
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion
     }
 }

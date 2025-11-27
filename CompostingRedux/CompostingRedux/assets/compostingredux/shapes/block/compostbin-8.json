@@ -315,8 +315,8 @@
 				},
 				{
 					"name": "floor",
-					"from": [ -6.2, 0.1, -6.2 ],
-					"to": [ 6.3, 1.1, 6.3 ],
+					"from": [ -5.9, 0.1, -5.9 ],
+					"to": [ 5.9, 1.1, 5.9 ],
 					"rotationOrigin": [ -8.2, 0.1, -8.2 ],
 					"faces": {
 						"north": { "texture": "#null", "uv": [ 0.0, 0.0, 12.5, 1.0 ], "enabled": false },
@@ -329,8 +329,8 @@
 				},
 				{
 					"name": "compost layer",
-					"from": [ -6.2, 7.1, -6.2 ],
-					"to": [ 6.3, 8.1, 6.3 ],
+					"from": [ -5.9, 7.1, -5.9 ],
+					"to": [ 5.9, 8.1, 5.9 ],
 					"rotationOrigin": [ -8.2, 7.1, -8.2 ],
 					"faces": {
 						"north": { "texture": "#null", "uv": [ 0.0, 0.0, 12.5, 1.0 ], "enabled": false },
