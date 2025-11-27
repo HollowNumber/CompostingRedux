@@ -22,6 +22,10 @@
         {
           "title": "compostingredux:handbook-tips-title",
           "text": "compostingredux:handbook-tips-text"
+        },
+        {
+          "title": "compostingredux:handbook-ratio-title",
+          "text": "compostingredux:handbook-ratio-text"
         }
       ]
     }

@@ -7,13 +7,35 @@
   "compostingredux:pile-needs-settle": "The pile needs to settle. Wait {0} more hours.",
   "blockhelp-compostbin-bulkadd": "Add many",
   "blockhelp-compostbin-turn": "Turn pile with shovel",
+  "blockhelp-compostbin-water": "Water pile",
   "blockhelp-compostbin-harvest": "Harvest compost",
-  "compostingredux:handbook-howto-title": "How to Use",
-  "compostingredux:handbook-howto-text": "1. Place compostable materials (rotting food, vegetables, grains)\n2. Use a shovel to turn the pile every few hours\n3. Wait for decomposition to complete\n4. Harvest compost for your garden",
-  "compostingredux:handbook-tips-title": "Tips & Tricks",
-  "compostingredux:handbook-tips-text": "• Turn the pile regularly for faster composting",
+  "compostingredux:handbook-howto-title": "Creation",
+  "compostingredux:handbook-howto-text": "Add compostable organic materials to the bin. Materials are classified as greens (nitrogen-rich) or browns (carbon-rich). The ratio between these materials affects decomposition speed.\n\nUse a shovel on the pile to turn it, providing aeration and speeding up the process. Harvest finished compost by right-clicking with an empty hand.",
+  "compostingredux:handbook-tips-title": "Material Types",
+  "compostingredux:handbook-tips-text": "Greens (C:N ratio 15:1): Vegetables, fruit, rot\nBrowns (C:N ratio 60:1): Grain\n\nThe bin calculates a weighted average C:N ratio based on the materials added. A ratio of 25-30:1 is optimal for fastest decomposition (1.5x speed). Ratios below 20:1 or above 40:1 will slow decomposition to 0.5x speed.\n\nA mix of approximately 2 greens to 1 brown achieves optimal ratios. Hover over the bin to view current material counts, C:N ratio, and decomposition speed.",
+  "compostingredux:handbook-ratio-title": "Carbon to Nitrogen Ratio",
+  "compostingredux:handbook-ratio-text": "The C:N ratio determines decomposition rate. Each material contributes its C:N value weighted by quantity.\n\nExamples:\n10 greens = 15:1 ratio (0.5x speed)\n10 browns = 60:1 ratio (0.5x speed)\n10 greens + 5 browns = 30:1 ratio (1.5x speed)\n6 greens + 9 browns = 42:1 ratio (0.7x speed)\n\nSpeed multipliers by ratio:\n15-20:1 = 0.5x (too much nitrogen)\n25-30:1 = 1.5x (optimal)\n35-40:1 = 1.0x (acceptable)\n45+:1 = 0.5x (too much carbon)",
 
   "compostingredux:compostbin-tooltip-composting-for": "Composting for: {0}/{1} days \n",
   "compostingredux:compostbin-tooltip-composting-ready": "Compost Ready!",
-  "compostingredux:compostbin-tooltip-composting-contents": "Contents: \n {0} \n"
+  "compostingredux:compostbin-tooltip-composting-contents": "Contents: \n {0} \n",
+  "compostingredux:compostbin-tooltip-materials": "Greens: {0} | Browns: {1}",
+  "compostingredux:compostbin-tooltip-cn-ratio": "C:N Ratio: {0}:1 {1}",
+  "compostingredux:compostbin-tooltip-speed": "Speed: {0}x",
+  
+  "compostingredux:compostbin-tooltip-greens-header": "Greens (Nitrogen):",
+  "compostingredux:compostbin-tooltip-browns-header": "Browns (Carbon):",
+  
+  "compostingredux:compostbin-tooltip-moisture": "Moisture: {0} ({1}%)",
+  "compostingredux:compostbin-tooltip-moisture-too-dry": "Too dry - add water or wait for rain",
+  "compostingredux:compostbin-tooltip-moisture-too-wet": "Too wet - add dry browns or turn pile",
+  
+  "compostingredux:compostbin-tooltip-aeration": "Aeration: {0} ({1}%)",
+  "compostingredux:compostbin-tooltip-aeration-anaerobic": "Anaerobic - turn pile to add oxygen!",
+  "compostingredux:compostbin-tooltip-aeration-low": "Low oxygen - consider turning pile",
+  
+  "compostingredux:compostbin-tooltip-temperature": "Temperature: {0} ({1}°C)",
+  "compostingredux:compostbin-tooltip-temperature-too-cold": "Too cold - decomposition very slow",
+  "compostingredux:compostbin-tooltip-temperature-too-hot": "Too hot - beneficial organisms stressed",
+  "compostingredux:compostbin-tooltip-temperature-thermophilic": "Optimal thermophilic range - excellent decomposition!"
 }

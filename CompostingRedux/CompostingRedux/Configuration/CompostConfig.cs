@@ -89,25 +89,60 @@ namespace CompostingRedux.Configuration
         #region Compostable Items
 
         /// <summary>
-        /// Array of item code path prefixes that are considered compostable.
-        /// Items whose code path starts with any of these strings can be composted.
-        /// Default: ["vegetable-", "grain-"]
+        /// Green materials (nitrogen-rich) - decompose faster, heat up pile.
+        /// Format: "itemcode" or "prefix-*"
+        /// Default: vegetables, fruits, grass, manure
         /// </summary>
-        public string[] CompostablePathPrefixes { get; set; } = new[]
+        public string[] GreenMaterials { get; set; } = new[]
         {
             "vegetable-",
-            "grain-"
+            "fruit-",
+            "rot"
         };
 
         /// <summary>
-        /// Array of exact item code paths that are considered compostable.
-        /// Items whose code path exactly matches any of these strings can be composted.
-        /// Default: ["rot"]
+        /// Brown materials (carbon-rich) - decompose slower, provide structure.
+        /// Format: "itemcode" or "prefix-*"
+        /// Default: grains, straw, dry materials
         /// </summary>
-        public string[] CompostableExactPaths { get; set; } = new[]
+        public string[] BrownMaterials { get; set; } = new[]
         {
-            "rot"
+            "grain-",
         };
+
+        #endregion
+
+        #region Material Properties
+
+        /// <summary>
+        /// Carbon to Nitrogen ratio for green materials (nitrogen-rich).
+        /// Greens have LOW C:N ratios. Default: 15 (typical for fresh grass/food scraps)
+        /// </summary>
+        public float GreenCNRatio { get; set; } = 15f;
+
+        /// <summary>
+        /// Carbon to Nitrogen ratio for brown materials (carbon-rich).
+        /// Browns have HIGH C:N ratios. Default: 60 (typical for dry leaves/straw)
+        /// </summary>
+        public float BrownCNRatio { get; set; } = 60f;
+
+        /// <summary>
+        /// Optimal carbon to nitrogen ratio for fast composting.
+        /// Default: 27.5 (realistic range is 25-30)
+        /// </summary>
+        public float OptimalCNRatio { get; set; } = 27.5f;
+
+        /// <summary>
+        /// Speed bonus when C:N ratio is optimal (multiplier).
+        /// Default: 1.5 (50% faster)
+        /// </summary>
+        public float OptimalRatioBonus { get; set; } = 1.5f;
+
+        /// <summary>
+        /// Speed penalty when C:N ratio is very poor (multiplier).
+        /// Default: 0.5 (50% slower)
+        /// </summary>
+        public float PoorRatioPenalty { get; set; } = 0.5f;
 
         #endregion
 
@@ -124,8 +159,35 @@ namespace CompostingRedux.Configuration
 
             string path = handSlot.Itemstack.Collectible.Code.Path;
 
-            return CompostableExactPaths.Contains(path) ||
-                   CompostablePathPrefixes.Any(prefix => path.StartsWith(prefix));
+            // Check green and brown materials
+            return IsGreenMaterial(path) || IsBrownMaterial(path);
+        }
+
+        /// <summary>
+        /// Checks if an item is a green (nitrogen-rich) material.
+        /// </summary>
+        public bool IsGreenMaterial(string itemPath)
+        {
+            return GreenMaterials.Any(mat => 
+                mat.EndsWith("-") ? itemPath.StartsWith(mat) : itemPath == mat);
+        }
+
+        /// <summary>
+        /// Checks if an item is a brown (carbon-rich) material.
+        /// </summary>
+        public bool IsBrownMaterial(string itemPath)
+        {
+            return BrownMaterials.Any(mat => 
+                mat.EndsWith("-") ? itemPath.StartsWith(mat) : itemPath == mat);
+        }
+
+        /// <summary>
+        /// Gets the material type for composting calculations.
+        /// </summary>
+        public MaterialType GetMaterialType(string itemPath)
+        {
+            if (IsGreenMaterial(itemPath)) return MaterialType.Green;
+            return MaterialType.Brown;
         }
 
         /// <summary>
@@ -138,5 +200,14 @@ namespace CompostingRedux.Configuration
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// Material type for composting.
+    /// </summary>
+    public enum MaterialType
+    {
+        Green,  // Nitrogen-rich (vegetables, fruits, grass)
+        Brown   // Carbon-rich (grains, straw, dry materials)
     }
 }

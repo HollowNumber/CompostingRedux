@@ -3,14 +3,15 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
+using CompostingRedux.Composting.Interfaces;
 
-namespace CompostingRedux.BlockEntities.Helpers
+namespace CompostingRedux.Helpers
 {
     /// <summary>
     /// Handles audio and visual feedback for the compost bin.
     /// Provides methods for playing sounds, animations, and spawning particles.
     /// </summary>
-    public class CompostBinFeedback
+    public class CompostBinFeedback : IFeedbackProvider
     {
         private readonly ICoreAPI api;
         private readonly BlockPos position;
@@ -29,15 +30,65 @@ namespace CompostingRedux.BlockEntities.Helpers
         #region Sound
 
         /// <summary>
-        /// Plays a sound at the compost bin position (client-side only).
+        /// Plays a sound effect at the block's position. (IFeedbackProvider implementation)
         /// </summary>
-        /// <param name="assetPath">Asset path of the sound to play</param>
-        /// <param name="player">Player who triggered the sound (optional)</param>
-        public void PlaySound(string assetPath, IPlayer? player = null)
+        /// <param name="soundPath">Asset path to the sound</param>
+        /// <param name="randomizePitch">Whether to randomize pitch for variety</param>
+        public void PlaySound(string soundPath, bool randomizePitch = true)
         {
             if (!IsClient) return;
+            api.World.PlaySoundAt(new AssetLocation(soundPath), position.X, position.Y, position.Z, null, randomizePitch);
+        }
 
-            api.World.PlaySoundAt(new AssetLocation(assetPath), position.X, position.Y, position.Z, player);
+        /// <summary>
+        /// Spawns particle effects at the specified position. (IFeedbackProvider implementation)
+        /// </summary>
+        /// <param name="pos">World position to spawn particles</param>
+        /// <param name="particleType">Type of particle effect to spawn</param>
+        /// <param name="count">Number of particles to spawn</param>
+        public void SpawnParticles(Vec3d pos, string particleType, int count = 10)
+        {
+            if (!IsClient) return;
+            // Implement particle spawning based on particleType
+            // This is a placeholder - actual implementation would use api.World.SpawnParticles
+        }
+
+        /// <summary>
+        /// Provides feedback when an item is successfully added. (IFeedbackProvider implementation)
+        /// </summary>
+        /// <param name="player">The player who added the item</param>
+        public void OnItemAdded(IPlayer player)
+        {
+            PlayAddSound();
+        }
+
+        /// <summary>
+        /// Provides feedback when an item is successfully harvested. (IFeedbackProvider implementation)
+        /// </summary>
+        /// <param name="player">The player who harvested</param>
+        public void OnItemHarvested(IPlayer player)
+        {
+            PlayHarvestSound();
+        }
+
+        /// <summary>
+        /// Provides feedback when the pile is turned. (IFeedbackProvider implementation)
+        /// </summary>
+        /// <param name="player">The player who turned the pile</param>
+        public void OnPileTurned(IPlayer player)
+        {
+            PlayDigSound();
+        }
+
+        /// <summary>
+        /// Provides feedback when an action fails. (IFeedbackProvider implementation)
+        /// </summary>
+        /// <param name="player">The player who attempted the action</param>
+        /// <param name="message">The failure message to display</param>
+        public void OnActionFailed(IPlayer player, string message)
+        {
+            if (!IsClient) return;
+            (api as ICoreClientAPI)?.ShowChatMessage(message);
         }
         
 
@@ -46,7 +97,7 @@ namespace CompostingRedux.BlockEntities.Helpers
         /// </summary>
         public void PlayDigSound(IPlayer? player = null)
         {
-            PlaySound(CompostBinConstants.SoundDirtDig, player);
+            PlaySound(CompostBinConstants.SoundDirtDig);
         }
 
         /// <summary>
@@ -54,7 +105,7 @@ namespace CompostingRedux.BlockEntities.Helpers
         /// </summary>
         public void PlayAddSound(IPlayer? player = null)
         {
-            PlaySound(CompostBinConstants.SoundSand, player);
+            PlaySound(CompostBinConstants.SoundSand);
         }
 
         /// <summary>
@@ -62,7 +113,7 @@ namespace CompostingRedux.BlockEntities.Helpers
         /// </summary>
         public void PlayHarvestSound(IPlayer? player = null)
         {
-            PlaySound(CompostBinConstants.SoundCollect, player);
+            PlaySound(CompostBinConstants.SoundCollect);
         }
 
         #endregion
@@ -76,11 +127,11 @@ namespace CompostingRedux.BlockEntities.Helpers
         /// </summary>
         /// <param name="assetPath">Asset path of the sound to play</param>
         /// <param name="isFinished">Whether the compost is finished (affects particle color)</param>
-        /// <param name="player">Player who triggered the effect (optional)</param>
-        public void PlaySoundBurst(string assetPath, bool isFinished, IPlayer? player = null)
+        public void PlaySoundBurst(string assetPath, bool isFinished)
         {
             if (!IsClient || api.World == null) return;
 
+            api.World.PlaySoundAt(new AssetLocation(assetPath), position.X, position.Y, position.Z, null, true);
             // Spawn particles and play sound multiple times during the animation
             int delayBetweenBursts = CompostBinConstants.AnimDurationMs / CompostBinConstants.ParticleBurstCount;
 
@@ -89,7 +140,7 @@ namespace CompostingRedux.BlockEntities.Helpers
                 int burstIndex = i; // Capture for lambda
                 api.World.RegisterCallback((dt) =>
                 {
-                    PlaySound(assetPath, player);
+                    PlaySound(assetPath);
                     SpawnDigParticles(isFinished);
                 }, delayBetweenBursts * burstIndex);
             }
@@ -102,7 +153,7 @@ namespace CompostingRedux.BlockEntities.Helpers
         /// <param name="player">Player who triggered the effect (optional)</param>
         public void PlayDigSoundBurst(bool isFinished, IPlayer? player = null)
         {
-            PlaySoundBurst(CompostBinConstants.SoundDirtDig, isFinished, player);
+            PlaySoundBurst(CompostBinConstants.SoundDirtDig, isFinished);
         }
 
         /// <summary>
@@ -112,7 +163,7 @@ namespace CompostingRedux.BlockEntities.Helpers
         /// <param name="player">Player who triggered the effect (optional)</param>
         public void PlayAddSoundBurst(bool isFinished, IPlayer? player = null)
         {
-            PlaySoundBurst(CompostBinConstants.SoundSand, isFinished, player);
+            PlaySoundBurst(CompostBinConstants.SoundSand, isFinished);
         }
 
         /// <summary>
@@ -122,7 +173,7 @@ namespace CompostingRedux.BlockEntities.Helpers
         /// <param name="player">Player who triggered the effect (optional)</param>
         public void PlayHarvestSoundBurst(bool isFinished, IPlayer? player = null)
         {
-            PlaySoundBurst(CompostBinConstants.SoundCollect, isFinished, player);
+            PlaySoundBurst(CompostBinConstants.SoundCollect, isFinished);
         }
 
         /// <summary>
@@ -131,12 +182,11 @@ namespace CompostingRedux.BlockEntities.Helpers
         /// </summary>
         /// <param name="assetPath">Asset path of the sound to play</param>
         /// <param name="isFinished">Whether the compost is finished (affects particle color)</param>
-        /// <param name="player">Player who triggered the effect (optional)</param>
         public void PlayQuickSoundBurst(string assetPath, bool isFinished, IPlayer? player = null)
         {
             if (!IsClient) return;
 
-            PlaySound(assetPath, player);
+            api.World.PlaySoundAt(new AssetLocation(assetPath), position.X, position.Y, position.Z, null, true);
 
             // Spawn a smaller number of particle bursts with shorter delays
             for (int i = 0; i < CompostBinConstants.SoundBurstParticleCount; i++)

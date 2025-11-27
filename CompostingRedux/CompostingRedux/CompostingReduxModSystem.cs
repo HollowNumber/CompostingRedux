@@ -47,7 +47,7 @@ namespace CompostingRedux
                 Config = CompostConfig.GetDefault();
             }
 
-            // Save the config to ensure it exists on disk with current schema
+            // Save the config to ensure it exists o6n disk with current schema
             api.StoreModConfig(Config, "compostingreduxconfig.json");
         }
 

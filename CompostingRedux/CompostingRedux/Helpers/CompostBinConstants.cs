@@ -1,19 +1,19 @@
-namespace CompostingRedux.BlockEntities.Helpers
+namespace CompostingRedux.Helpers
 {
     /// <summary>
     /// Constants used by the compost bin system.
-    /// Centralizes all magic strings and numbers for easier maintenance.
+    /// Centralizes all magic strings and numbers for easier maintenance.  
     /// </summary>
     public static class CompostBinConstants
     {
         #region Sound Asset Paths
 
-        /// <summary>
-        /// Sound played when turning the pile with a shovel.
-        /// </summary>
+        /// <summary>  
+        /// Sound played when turning the pile with a shovel.  
+        /// </summary> 
         public const string SoundDirtDig = "game:sounds/block/dirt1";
 
-        /// <summary>
+        /// <summary> 
         /// Sound played when adding items to the compost bin.
         /// </summary>
         public const string SoundSand = "game:sounds/block/sand";

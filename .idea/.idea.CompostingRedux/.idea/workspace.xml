@@ -10,7 +10,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4965bce8-4bf3-4231-a28d-7d50e7d70103" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/modinfo.json" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/modinfo.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.CompostingRedux/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CompostingRedux/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/BlockEntities/BECompostBin.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/BlockEntities/BECompostBin.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/BlockEntities/Helpers/CompostBinConstants.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/BlockEntities/Helpers/CompostBinFeedback.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/Blocks/BlockCompostBin.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/Blocks/BlockCompostBin.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/CompostingReduxModSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/CompostingReduxModSystem.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/Configuration/CompostConfig.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/Configuration/CompostConfig.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/blocktypes/compostbin.json" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/blocktypes/compostbin.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/lang/en.json" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/CompostingRedux/assets/compostingredux/lang/en.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompostingRedux/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/CompostingRedux/build.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,7 +84,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected=".NET Project.CakeBuild">
+  <component name="RunManager" selected=".NET Launch Settings Profile.CompostingRedux: Client">
     <configuration name="CakeBuild" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="" />
       <option name="PROGRAM_PARAMETERS" value="" />

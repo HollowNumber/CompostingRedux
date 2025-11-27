@@ -84,7 +84,22 @@ namespace CompostingRedux.Blocks
                 }
             }
 
-            // 3. Harvest Interaction
+            // 3. Water Pile Interaction
+            if (be is { ItemAmount: > 0, IsFinished: false })
+            {
+                var waterContainers = GetWaterContainerExamples(world);
+                if (waterContainers.Count > 0)
+                {
+                    interactions.Add(new WorldInteraction
+                    {
+                        ActionLangCode = "compostingredux:blockhelp-compostbin-water",
+                        MouseButton = EnumMouseButton.Right,
+                        Itemstacks = waterContainers.ToArray()
+                    });
+                }
+            }
+
+            // 4. Harvest Interaction
             if (be.IsFinished)
             {
                 interactions.Add(new WorldInteraction
@@ -155,6 +170,23 @@ namespace CompostingRedux.Blocks
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Gets example water containers to display in interaction hints.
+        /// </summary>
+        private List<ItemStack> GetWaterContainerExamples(IWorldAccessor world)
+        {
+            var containers = new List<ItemStack>();
+
+            // Water portion (most common)
+            TryAdd(world, containers, "game:waterportion");
+
+            // Wooden bucket with water (if it exists as an item)
+            // Note: Buckets are typically blocks when filled, but we try anyway
+            TryAdd(world, containers, "game:woodbucket");
+
+            return containers;
         }
 
         #endregion
