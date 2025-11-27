@@ -72,14 +72,27 @@ namespace CompostingRedux.BlockEntities.Helpers
         /// <summary>
         /// Plays a sound burst with synchronized particles.
         /// Combines audio and visual feedback for a more immersive experience.
+        /// The sound plays multiple times, synchronized with each particle burst.
         /// </summary>
         /// <param name="assetPath">Asset path of the sound to play</param>
         /// <param name="isFinished">Whether the compost is finished (affects particle color)</param>
         /// <param name="player">Player who triggered the effect (optional)</param>
         public void PlaySoundBurst(string assetPath, bool isFinished, IPlayer? player = null)
         {
-            PlaySound(assetPath, player);
-            SpawnDigParticlesBurst(isFinished);
+            if (!IsClient || api.World == null) return;
+
+            // Spawn particles and play sound multiple times during the animation
+            int delayBetweenBursts = CompostBinConstants.AnimDurationMs / CompostBinConstants.ParticleBurstCount;
+
+            for (int i = 0; i < CompostBinConstants.ParticleBurstCount; i++)
+            {
+                int burstIndex = i; // Capture for lambda
+                api.World.RegisterCallback((dt) =>
+                {
+                    PlaySound(assetPath, player);
+                    SpawnDigParticles(isFinished);
+                }, delayBetweenBursts * burstIndex);
+            }
         }
 
         /// <summary>
@@ -201,9 +214,10 @@ namespace CompostingRedux.BlockEntities.Helpers
 
         /// <summary>
         /// Spawns a single burst of dirt/compost particles (client-side only).
+        /// Made internal so it can be called by PlaySoundBurst.
         /// </summary>
         /// <param name="isFinished">Whether the compost is finished (affects particle color)</param>
-        private void SpawnDigParticles(bool isFinished)
+        internal void SpawnDigParticles(bool isFinished)
         {
             if (!IsClient || api.World == null) return;
 
