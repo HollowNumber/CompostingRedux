@@ -39,6 +39,7 @@ namespace CompostingRedux.BlockEntities.Helpers
 
             api.World.PlaySoundAt(new AssetLocation(assetPath), position.X, position.Y, position.Z, player);
         }
+        
 
         /// <summary>
         /// Plays the dirt digging sound.
@@ -62,6 +63,77 @@ namespace CompostingRedux.BlockEntities.Helpers
         public void PlayHarvestSound(IPlayer? player = null)
         {
             PlaySound(CompostBinConstants.SoundCollect, player);
+        }
+
+        #endregion
+
+        #region Combined Effects
+
+        /// <summary>
+        /// Plays a sound burst with synchronized particles.
+        /// Combines audio and visual feedback for a more immersive experience.
+        /// </summary>
+        /// <param name="assetPath">Asset path of the sound to play</param>
+        /// <param name="isFinished">Whether the compost is finished (affects particle color)</param>
+        /// <param name="player">Player who triggered the effect (optional)</param>
+        public void PlaySoundBurst(string assetPath, bool isFinished, IPlayer? player = null)
+        {
+            PlaySound(assetPath, player);
+            SpawnDigParticlesBurst(isFinished);
+        }
+
+        /// <summary>
+        /// Plays a dirt dig sound burst with particles.
+        /// </summary>
+        /// <param name="isFinished">Whether the compost is finished (affects particle color)</param>
+        /// <param name="player">Player who triggered the effect (optional)</param>
+        public void PlayDigSoundBurst(bool isFinished, IPlayer? player = null)
+        {
+            PlaySoundBurst(CompostBinConstants.SoundDirtDig, isFinished, player);
+        }
+
+        /// <summary>
+        /// Plays an add sound burst with particles.
+        /// </summary>
+        /// <param name="isFinished">Whether the compost is finished (affects particle color)</param>
+        /// <param name="player">Player who triggered the effect (optional)</param>
+        public void PlayAddSoundBurst(bool isFinished, IPlayer? player = null)
+        {
+            PlaySoundBurst(CompostBinConstants.SoundSand, isFinished, player);
+        }
+
+        /// <summary>
+        /// Plays a harvest sound burst with particles.
+        /// </summary>
+        /// <param name="isFinished">Whether the compost is finished (affects particle color)</param>
+        /// <param name="player">Player who triggered the effect (optional)</param>
+        public void PlayHarvestSoundBurst(bool isFinished, IPlayer? player = null)
+        {
+            PlaySoundBurst(CompostBinConstants.SoundCollect, isFinished, player);
+        }
+
+        /// <summary>
+        /// Plays a quick sound burst with a smaller number of synchronized particle bursts.
+        /// Ideal for short, punchy feedback effects.
+        /// </summary>
+        /// <param name="assetPath">Asset path of the sound to play</param>
+        /// <param name="isFinished">Whether the compost is finished (affects particle color)</param>
+        /// <param name="player">Player who triggered the effect (optional)</param>
+        public void PlayQuickSoundBurst(string assetPath, bool isFinished, IPlayer? player = null)
+        {
+            if (!IsClient) return;
+
+            PlaySound(assetPath, player);
+
+            // Spawn a smaller number of particle bursts with shorter delays
+            for (int i = 0; i < CompostBinConstants.SoundBurstParticleCount; i++)
+            {
+                int burstIndex = i; // Capture for lambda
+                api.World.RegisterCallback((dt) =>
+                {
+                    SpawnDigParticles(isFinished);
+                }, CompostBinConstants.SoundBurstDelayMs * burstIndex);
+            }
         }
 
         #endregion

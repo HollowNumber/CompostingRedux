@@ -65,6 +65,16 @@ namespace CompostingRedux.BlockEntities.Helpers
         public const int ParticleBurstCount = 6;
 
         /// <summary>
+        /// Number of particle bursts for a single sound burst effect.
+        /// </summary>
+        public const int SoundBurstParticleCount = 2;
+
+        /// <summary>
+        /// Delay between particle bursts in a sound burst effect (in milliseconds).
+        /// </summary>
+        public const int SoundBurstDelayMs = 150;
+
+        /// <summary>
         /// Minimum number of particles per burst.
         /// </summary>
         public const int ParticleMinQuantity = 8;

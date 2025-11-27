@@ -235,9 +235,8 @@ namespace CompostingRedux.BlockEntities
             lastTurnTime = currentTime;
 
             // Play feedback
-            feedback.PlayDigSound(byPlayer);
             feedback.PlayShovelDigAnimation(byPlayer);
-            feedback.SpawnDigParticlesBurst(isFinished);
+            feedback.PlayDigSoundBurst(isFinished, byPlayer);
 
             // Check if this turn completed the composting
             if (CompostProgress >= 100f)
